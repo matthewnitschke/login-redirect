@@ -1,6 +1,6 @@
 body {
     padding: .5rem;
-    min-width: 20rem;
+    min-width: 30rem;
 }
 
 h2 {
@@ -9,6 +9,19 @@ h2 {
 
 h3 {
     margin-top: 1.6rem;
+}
+
+.dfc {
+    display: flex;
+    flex-direction: column;
+}
+
+.mb1 {
+    margin-bottom: .3rem;
+}
+
+.fg {
+    flex-grow: 1;
 }
 
 .disabled {
@@ -25,10 +38,6 @@ h3 {
     display: flex;
     align-items: center;
     margin: .3rem 0;
-}
-
-.input-param-wrapper input[type="text"] {
-    width: 100%;
 }
 
 .delete-button {
@@ -68,9 +77,8 @@ input[type="text"] {
     font-family: monospace;
 }
 
-input[type="checkbox"]:not(:checked) + input, 
-input[type="checkbox"]:not(:checked) + input + input,
-input[type="checkbox"]:not(:checked) + input + input + input {
+input[type="checkbox"]:not(:checked) + *, 
+input[type="checkbox"]:not(:checked) + * + * {
     color: grey;
     opacity: .6;
 }

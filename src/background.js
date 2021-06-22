@@ -1,28 +1,33 @@
+// the list of login redirects, holds what the user configured loginUrls and redirectedUrls
+let loginRedirects;
+
+// the user configured setting for whether or not to apply any login redirects
+let globalEnabled;
+
+// always updated last url that was loaded. Used to know what the original url (before login redirect) is 
+// so we can redirect back to it after website redirect
 var lastUrl;
+
+// holds the website to redirect to. When populated, on the next url change, this url will be redirected to.
+// When set, this variable variable will be cleared in 3 minutes if the `oldRedirectUrl` is not navigated to.
 let urlToRedirectTo;
 
+// holds the url that the website is redirecting us to, but we don't want to actually go to. When the current url
+// equals this one, and 'urlToRedirectTo' is not empty, we perform a redirect event
 let oldRedirectUrl;
 
-let loginRedirects;
-let globalEnabled;
-chrome.storage.sync.get(["globalEnabled", "loginRedirects"], (params) => {
-  loginRedirects = params.loginRedirects;
-  globalEnabled = params.globalEnabled;
-});
 
-chrome.storage.onChanged.addListener(function (changes, area) {
-  if (
-    changes.options.containsKey("loginRedirects") ||
-    changes.containsKey("globalEnabled")
-  ) {
-    loginRedirects = changes?.options?.loginRedirects ?? loginRedirects;
-    globalEnabled = changes?.options?.globalEnabled ?? globalEnabled;
+function updateSettings() {
+  chrome.storage.sync.get(["globalEnabled", "loginRedirects"], (params) => {
+    globalEnabled = params.globalEnabled;
 
-    console.log(loginRedirects);
-  }
-});
+    // only persist the enabled loginRedirects
+    loginRedirects = params.loginRedirects.filter(({ enabled }) => enabled);
+  });
+}
+chrome.storage.onChanged.addListener(updateSettings);
 
-chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
+chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (!globalEnabled) return;
   
   if (changeInfo.url) {
@@ -30,9 +35,9 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
 
     for (var loginRedirect of loginRedirects ?? []) {
       if (loginRedirect.loginUrl == currentUrl) {
-        console.log(`login page found, storing ${lastUrl} to redirect to`);
         urlToRedirectTo = lastUrl;
         oldRedirectUrl = loginRedirect.redirectedUrl;
+        
         setTimeout(() => {
           urlToRedirectTo = null;
         }, 180000); // 3 minutes
@@ -48,3 +53,7 @@ chrome.tabs.onUpdated.addListener(function (tabId, changeInfo, tab) {
     lastUrl = changeInfo.url;
   }
 });
+
+
+// initial settings load
+updateSettings();
