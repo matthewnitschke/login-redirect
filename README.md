@@ -2,4 +2,4 @@
 
 # Login Redirect
 
-A chrome extension to fix websites bad login redirection functionality
+Fixes websites bad post-login redirection functionality by redirecting you to the page you were at before taken to the login page
